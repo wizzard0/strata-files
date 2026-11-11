@@ -18,7 +18,7 @@ final class DockSearch: NSObject, NSTextFieldDelegate, NSTableViewDataSource, NS
                                           styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
     private let field = NSTextField()
     private let table = PressedRowTable()
-    private let boxGlass = NSGlassEffectView()
+    private let boxGlass = Glass.panel()
     private let ranker = PaletteRanker()
     private var follower: Timer?
     private let reader = DockReader()
@@ -140,7 +140,7 @@ final class DockSearch: NSObject, NSTextFieldDelegate, NSTableViewDataSource, NS
         guard frame != placed else { return }
         placed = frame
         box.setFrame(frame, display: true)
-        boxGlass.cornerRadius = layout.cornerRadius
+        boxGlass.panelCornerRadius = layout.cornerRadius
         field.font = .systemFont(ofSize: max(12, min(15, frame.height * 0.37)))
         box.orderFrontRegardless()
         placeResults()
@@ -328,8 +328,8 @@ final class DockSearch: NSObject, NSTextFieldDelegate, NSTableViewDataSource, NS
 
     private func build() {
         setUpPanels()
-        boxGlass.cornerRadius = 9
-        boxGlass.contentView = searchRow()
+        boxGlass.panelCornerRadius = 9
+        boxGlass.panelContent = searchRow()
         box.contentView = boxGlass
         setUpResults()
         NotificationCenter.default.addObserver(self, selector: #selector(boxBecameKey), name: NSWindow.didBecomeKeyNotification, object: box)
@@ -391,7 +391,7 @@ final class DockSearch: NSObject, NSTextFieldDelegate, NSTableViewDataSource, NS
         let scroll = NSScrollView()
         ChoiceList.configure(scroll, showing: table, insets: NSEdgeInsets(top: 6, left: 0, bottom: 6, right: 0))
         let card = ShadowedGlass(cornerRadius: 18)
-        card.glass.contentView = scroll
+        card.glass.panelContent = scroll
         results.contentView = card
     }
 }

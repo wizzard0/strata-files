@@ -41,7 +41,7 @@ final class ConnectToServerController: NSViewController, NSComboBoxDelegate, NSC
     private(set) var connecting: Task<Void, Never>?
 
     init(editing server: RemoteServer? = nil, settings: ServerConnectionSettings, mounts: ServerMountSession,
-         connections: RemoteConnections, sshHosts: @escaping @Sendable () async -> [String] = ConnectToServerController.sshConfigHosts) {
+         connections: RemoteConnections, sshHosts: @escaping @Sendable () async -> [String] = { await ConnectToServerController.sshConfigHosts() }) {
         self.connections = connections
         self.mounts = mounts
         self.settings = settings

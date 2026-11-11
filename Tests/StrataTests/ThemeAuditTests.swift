@@ -164,6 +164,8 @@ extension ColorThemeTests {
         }
     }
 
+    // Liquid Glass and its split view accessories arrived with macOS 26.
+    @available(macOS 26, *)
     @Test func repeatedHeaderRefreshesDoNotReassignTheSameGlassTint() throws {
         let saved = ThemeStyle.options, contrast = ThemeStyle.highContrast
         defer { ThemeStyle.apply(saved, windows: [], highContrast: contrast) }
@@ -290,6 +292,7 @@ extension ColorThemeTests {
     }
 }
 
+@available(macOS 26, *)
 private final class CountingThemeGlass: NSGlassEffectView {
     var assignments = 0
     override var tintColor: NSColor? { didSet { assignments += 1 } }

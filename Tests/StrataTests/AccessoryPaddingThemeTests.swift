@@ -10,6 +10,8 @@ import Testing
 @testable import StrataSearch
 
 extension ColorThemeTests {
+    // Liquid Glass and its split view accessories arrived with macOS 26.
+    @available(macOS 26, *)
     @Test func nativeAccessoryPaddingUsesTheWholeCanvasAndPreservesInsetsAndControls() throws {
         let saved = ThemeStyle.options, contrast = ThemeStyle.highContrast
         defer { ThemeStyle.apply(saved, windows: [], highContrast: contrast) }
@@ -24,7 +26,9 @@ extension ColorThemeTests {
         split.scopeBar.isHidden = false
         split.noticeBar.isHidden = false
         let sidebarFooter = try #require(split.splitViewItems[0].bottomAlignedAccessoryViewControllers.first)
-        let accessories = [split.status, split.scopeBar, split.noticeBar, sidebarFooter]
+        let files = split.splitViewItems[1]
+        let accessories = files.bottomAlignedAccessoryViewControllers + files.topAlignedAccessoryViewControllers + [sidebarFooter]
+        #expect(accessories.count == 4)
         for name in [NSAppearance.Name.aqua, .darkAqua] {
             window.appearance = NSAppearance(named: name)
             for size in [NSSize(width: 1240, height: 780), NSSize(width: 900, height: 600)] {

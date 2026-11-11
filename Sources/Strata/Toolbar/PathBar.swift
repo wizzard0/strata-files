@@ -588,7 +588,7 @@ final class ChevronButton: NSButton {
     /// Its subfolders being read for the menu.
     private(set) var reading: Task<Void, Never>?
 
-    init(folder: URL, name: String, readFolders: @escaping FolderReader = ChevronButton.subfolders,
+    init(folder: URL, name: String, readFolders: @escaping FolderReader = { await ChevronButton.subfolders(of: $0) },
          presentMenu: (@MainActor (ChevronButton, [URL]) -> Void)? = nil, navigate: @escaping (URL) -> Void) {
         self.folder = folder
         self.navigate = navigate

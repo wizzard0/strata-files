@@ -116,6 +116,8 @@ extension ColorThemeTests {
         #expect(!window.isVisible && !host.isVisible)
     }
 
+    // Liquid Glass and its split view accessories arrived with macOS 26.
+    @available(macOS 26, *)
     @Test func nativeSidebarAndInspectorHeadersKeepTheirOutlinesAndLayout() throws {
         let saved = ThemeStyle.options, contrast = ThemeStyle.highContrast
         defer { ThemeStyle.apply(saved, windows: [], highContrast: contrast) }

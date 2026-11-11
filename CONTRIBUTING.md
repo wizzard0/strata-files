@@ -25,7 +25,8 @@ Catppuccin, and the checks to run.
 ## Change the code
 
 Strata is a native macOS app in Swift and AppKit, built with Swift Package Manager. You need an Apple silicon Mac
-running macOS 26, and Xcode for the tests.
+running macOS 26, and Xcode for the tests. macOS 15 with Xcode 26.3 builds and runs it too, without Liquid Glass and
+Apple Intelligence.
 
 ```sh
 scripts/build.sh debug --open    # builds build/Strata.app and opens it

@@ -65,7 +65,7 @@ final class InspectorViewController: NSViewController {
     init(services: BrowserServices,
          previewScheduler: @escaping (DispatchWorkItem) -> Void = {
              DispatchQueue.main.asyncAfter(deadline: .now() + 0.08, execute: $0)
-         }, readSelectionSizes: @escaping InspectorSelectionSizes.Reader = InspectorSelectionSizes.read,
+         }, readSelectionSizes: @escaping InspectorSelectionSizes.Reader = { await InspectorSelectionSizes.read($0, folders: $1, copies: $2) },
          makePreview: PreviewFactory? = nil) {
         self.services = services
         self.readSelectionSizes = readSelectionSizes
@@ -82,7 +82,7 @@ final class InspectorViewController: NSViewController {
             RichPreview.makeView(for: entry.url, contentType: entry.contentType, preferences: services.preferences,
                                  clipboard: services.clipboard, media: services.mediaAnalysis, fallback: fallback)
         }
-        infoEditor = InfoEditor(readFacts: InfoEditor.Facts.read(_:opensWithApps:))
+        infoEditor = InfoEditor(readFacts: { await InfoEditor.Facts.read($0, opensWithApps: $1) })
         super.init(nibName: nil, bundle: nil)
     }
 

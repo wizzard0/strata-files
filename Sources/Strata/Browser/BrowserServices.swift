@@ -9,7 +9,7 @@ final class BrowserServices {
     private static func application() -> BrowserServices {
         BrowserServices(transfers: .shared, visits: .shared, windows: .native, remote: .shared,
                         containers: .shared, containerStore: .shared, clipboard: .shared,
-                        cloudFolders: CloudFolders.discover, tags: .shared, cloud: .shared, git: .shared, index: .shared,
+                        cloudFolders: { await CloudFolders.discover() }, tags: .shared, cloud: .shared, git: .shared, index: .shared,
                         contentIndex: .shared, showSetting: SettingsWindowController.present)
     }
 
@@ -20,7 +20,7 @@ final class BrowserServices {
                          containers: ContainerFiles? = nil, containerStore: ContainerStore = ContainerStore(),
                          windows: BrowserWindows = .headless, directories: DirectoryReader? = nil,
                          mediaReader: @escaping MediaInfoLoader.Reader = MediaInfoLoader.read,
-                         mediaDetailsReader: @escaping MediaDetails.Reader = ArchiveMetadata.readDetails,
+                         mediaDetailsReader: @escaping MediaDetails.Reader = { await ArchiveMetadata.readDetails($0, contentType: $1) },
                          mediaAnalysis: MediaAnalysisReader = MediaAnalysisReader(),
                          showSetting: @escaping @MainActor (SettingID) -> Void = { _ in }) -> BrowserServices {
         let remote = RemoteServices(preferences: preferences, credentials: credentials,
@@ -39,10 +39,10 @@ final class BrowserServices {
     static func configured(transfers: TransferQueue, visits: Frecency, windows: BrowserWindows,
                            remote: RemoteServices, containers: ContainerFiles, containerStore: ContainerStore,
                            clipboard: Clipboard, directories: DirectoryReader? = nil,
-                           volumeSpace: @escaping @Sendable (URL) async -> VolumeSpace? = BrowserLoading.readVolumeSpace,
+                           volumeSpace: @escaping @Sendable (URL) async -> VolumeSpace? = { await BrowserLoading.readVolumeSpace($0) },
                            remoteBrowsing: RemoteBrowsing? = nil,
                            mediaReader: @escaping MediaInfoLoader.Reader = MediaInfoLoader.read,
-                           mediaDetailsReader: @escaping MediaDetails.Reader = ArchiveMetadata.readDetails,
+                           mediaDetailsReader: @escaping MediaDetails.Reader = { await ArchiveMetadata.readDetails($0, contentType: $1) },
                            mediaAnalysis: MediaAnalysisReader = MediaAnalysisReader(),
                            thumbnails: FileThumbnails? = nil, itemInfo: ItemInfoLoader? = nil,
                            cloudFolders: @escaping @Sendable () async -> [CloudFolder] = { [] },
@@ -98,11 +98,11 @@ final class BrowserServices {
     var statuses: FileStatuses { FileStatuses(tags: tags, cloud: cloud, git: git) }
 
     private init(transfers: TransferQueue, visits: Frecency, directories: DirectoryReader? = nil, windows: BrowserWindows,
-                 volumeSpace: @escaping @Sendable (URL) async -> VolumeSpace? = BrowserLoading.readVolumeSpace,
+                 volumeSpace: @escaping @Sendable (URL) async -> VolumeSpace? = { await BrowserLoading.readVolumeSpace($0) },
                  remote: RemoteServices, remoteBrowsing: RemoteBrowsing? = nil,
                  containers: ContainerFiles, containerStore: ContainerStore, clipboard: Clipboard,
                  mediaReader: @escaping MediaInfoLoader.Reader = MediaInfoLoader.read,
-                 mediaDetailsReader: @escaping MediaDetails.Reader = ArchiveMetadata.readDetails,
+                 mediaDetailsReader: @escaping MediaDetails.Reader = { await ArchiveMetadata.readDetails($0, contentType: $1) },
                  mediaAnalysis: MediaAnalysisReader = MediaAnalysisReader(),
                  thumbnails: FileThumbnails? = nil, itemInfo: ItemInfoLoader? = nil,
                  cloudFolders: @escaping @Sendable () async -> [CloudFolder] = { [] },
@@ -114,7 +114,7 @@ final class BrowserServices {
         self.transfers = transfers
         self.files = FileCommands(transfers: transfers)
         self.visits = visits
-        self.places = PlaceChecks(preferences: transfers.preferences, visits: visits, read: PlaceChecks.read)
+        self.places = PlaceChecks(preferences: transfers.preferences, visits: visits, read: { await PlaceChecks.read($0) })
         self.folderNames = FolderNames(read: FolderNames.read)
         self.remote = remote
         self.remoteBrowsing = remoteBrowsing ?? remote.browsing

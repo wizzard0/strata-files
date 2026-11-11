@@ -401,9 +401,11 @@ struct ArchiveExtractTests {
         let own = ["__MACOSX/", "__MACOSX/.config", "__MACOSX/notes.txt", "__MACOSX.old/", "__MACOSX.old/._file", "file"]
         let lower = ["__macosx/", "__macosx/._file", "file"], dotted = ["__MACOSX/", "__MACOSX/._file", "file"]
         let both = ["__MACOSX/", "__MACOSX/mixed/", "__MACOSX/mixed/._file", "__MACOSX/notes.txt", "mixed/", "mixed/file"]
-        let expected = ["out/"] + extracted("own", own) + extracted("own.damaged", own) + extracted("lower", lower)
-            + extracted("lower.damaged", lower) + extracted("dotted", dotted) + extracted("dotted.damaged", dotted)
-            + extracted("mixed", both)
+        // In steps: as one expression Swift 6.2 gives up type-checking it.
+        var expected = ["out/"] + extracted("own", own) + extracted("own.damaged", own)
+        expected += extracted("lower", lower) + extracted("lower.damaged", lower)
+        expected += extracted("dotted", dotted) + extracted("dotted.damaged", dotted)
+        expected += extracted("mixed", both)
         #expect(tree.snapshot().filter { $0.hasPrefix("out/") } == expected.sorted())
     }
 

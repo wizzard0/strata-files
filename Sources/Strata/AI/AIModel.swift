@@ -26,7 +26,8 @@ package nonisolated enum AIModel {
 
     package static var status: Status {
         if ProcessInfo.processInfo.environment["STRATA_AI_DISABLED"] == "1" { return .disabled }
-        guard isAppleSilicon else { return .deviceNotEligible }
+        // The model arrived with macOS 26: an earlier system is a Mac that can't run it.
+        guard isAppleSilicon, #available(macOS 26, *) else { return .deviceNotEligible }
         let model = SystemLanguageModel.default
         switch model.availability {
         case .available: return model.supportsLocale() ? .available : .unsupportedLanguage
@@ -44,7 +45,15 @@ package nonisolated enum AIModel {
     package static var isSupported: Bool { status != .deviceNotEligible }
 
     /// Tokens the model can see at once (instructions, prompt and response together).
-    package static var contextSize: Int { isAvailable ? SystemLanguageModel.default.contextSize : 0 }
+    package static var contextSize: Int {
+        guard #available(macOS 26, *), isAvailable else { return 0 }
+        #if compiler(>=6.3)
+        return SystemLanguageModel.default.contextSize
+        #else
+        // Xcode 26.3, the newest that runs on macOS 15, has an SDK that can't ask: the model's window is 4,096 tokens.
+        return 4096
+        #endif
+    }
 
     /// One sentence for UI, or nil when the model is available.
     package static var explanation: String? {
@@ -86,7 +95,7 @@ package nonisolated enum AIModel {
 /// Turns FoundationModels errors into a sentence for the UI.
 package nonisolated enum AIErrorText {
     package static func describe(_ error: Error) -> String {
-        if let error = error as? LanguageModelSession.GenerationError {
+        if #available(macOS 26, *), let error = error as? LanguageModelSession.GenerationError {
             switch error {
             case .exceededContextWindowSize: return String(localized: "The document is too long for the on-device model.")
             case .assetsUnavailable: return String(localized: "Apple Intelligence isn’t ready yet. Try again in a little while.")

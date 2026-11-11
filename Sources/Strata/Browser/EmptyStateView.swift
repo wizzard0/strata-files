@@ -1,4 +1,5 @@
 import AppKit
+import StrataSupport
 
 /// Centered message for empty folders and folders we can't read.
 final class EmptyStateView: NSView {
@@ -64,7 +65,7 @@ final class EmptyStateView: NSView {
 
 /// Floating glass capsule showing the type-to-filter query.
 final class FilterPill: NSView {
-    private let glass = NSGlassEffectView()
+    private let glass = Glass.panel()
     private let query = NSTextField(labelWithString: "")
     private let count = NSTextField(labelWithString: "")
 
@@ -72,7 +73,7 @@ final class FilterPill: NSView {
         super.init(frame: frame)
         translatesAutoresizingMaskIntoConstraints = false
         glass.translatesAutoresizingMaskIntoConstraints = false
-        glass.cornerRadius = 18
+        glass.panelCornerRadius = 18
         addSubview(glass)
 
         let icon = NSImageView(image: NSImage(systemSymbolName: "line.3.horizontal.decrease", accessibilityDescription: String(localized: "Filter", comment: "Accessibility: the type-to-filter capsule’s icon")) ?? NSImage())
@@ -91,7 +92,7 @@ final class FilterPill: NSView {
         stack.spacing = 8
         stack.setCustomSpacing(12, after: count)
         stack.edgeInsets = NSEdgeInsets(top: 0, left: 14, bottom: 0, right: 14)
-        glass.contentView = stack
+        glass.panelContent = stack
 
         NSLayoutConstraint.activate([
             glass.leadingAnchor.constraint(equalTo: leadingAnchor),

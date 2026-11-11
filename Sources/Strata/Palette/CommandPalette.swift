@@ -235,7 +235,7 @@ final class CommandPalette: NSObject {
             scroll.topAnchor.constraint(equalTo: separator.bottomAnchor),
             scroll.bottomAnchor.constraint(equalTo: content.bottomAnchor),
         ])
-        glass.contentView = content
+        glass.panelContent = content
         panel.contentView = chrome
     }
 
@@ -678,14 +678,14 @@ final class PaletteRanker {
 /// follows the panel and, on a focused one, rings it in dark ink; this one follows the glass's rounded shape.
 final class ShadowedGlass: NSView {
     static let margin: CGFloat = 28
-    let glass = NSGlassEffectView()
+    let glass = Glass.panel()
     private let shadowView = NSView()
     private let cornerRadius: CGFloat
 
     init(cornerRadius: CGFloat) {
         self.cornerRadius = cornerRadius
         super.init(frame: NSRect(x: 0, y: 0, width: 200, height: 100))
-        glass.cornerRadius = cornerRadius
+        glass.panelCornerRadius = cornerRadius
         shadowView.wantsLayer = true
         shadowView.layer?.shadowColor = NSColor.black.cgColor
         shadowView.layer?.shadowOpacity = 0.28

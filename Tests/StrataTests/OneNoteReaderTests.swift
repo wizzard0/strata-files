@@ -744,8 +744,10 @@ extension OneNoteReaderTests {
             var limits = OneStore.Limits()
             limits.arrayElements = limit
             let le = { (value: UInt32) in OneStoreFixture.ID.le(value) }
-            let sets = le(1 << 31) + [1, 0] + le(0x10 << 26 | 1) + le(UInt32(count)) + le(0x11 << 26)
-                + [UInt8](repeating: 0, count: 2 * count)
+            // In steps: as one expression Swift 6.2 gives up type-checking it.
+            var sets: [UInt8] = le(1 << 31) + [1, 0]
+            sets += le(0x10 << 26 | 1) + le(UInt32(count))
+            sets += le(0x11 << 26) + [UInt8](repeating: 0, count: 2 * count)
             try (data + Data(sets)).write(to: tree.url("Arrays.one"))
             let store = try OneStore(try FileReadSource(tree.url("Arrays.one")).open(), limits: limits)
             let object = StoredObject(jcid: 0x0006_000E, content: .properties(

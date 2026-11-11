@@ -280,7 +280,7 @@ private final class Keycap: NSView {
 }
 
 /// The sidebar's footer: a quiet button that opens the shortcuts list.
-final class SidebarFooterController: NSSplitViewItemAccessoryViewController {
+final class SidebarFooterController: SplitAccessoryBar {
     override func loadView() {
         let button = NSButton(title: String(localized: "Keyboard Shortcuts"), image: NSImage(systemSymbolName: "command", accessibilityDescription: nil) ?? NSImage(),
                               target: nil, action: #selector(AppDelegate.showShortcuts(_:)))

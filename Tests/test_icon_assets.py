@@ -28,7 +28,8 @@ class IconBuildTests(unittest.TestCase):
         self.original_info = (ROOT / "Resources" / "Info.plist").read_bytes()
         self.info.write_bytes(self.original_info)
 
-    @unittest.skipUnless(sys.platform == "darwin", "Xcode compiles the macOS app icon")
+    @unittest.skipUnless(sys.platform == "darwin" and build_icon.compiles_layers(build_icon.host_version()),
+                         "Xcode compiles the layered macOS app icon on macOS 26 or later")
     def test_app_bundle_has_adaptive_layers_and_the_contributed_fallback(self):
         with contextlib.redirect_stdout(io.StringIO()):
             build_icon.build(self.resources, self.info)
@@ -53,10 +54,32 @@ class IconBuildTests(unittest.TestCase):
             for scale in ["", "@2x"]:
                 self.assertTrue((iconset / f"icon_{size}x{size}{scale}.png").is_file())
 
+    def test_a_mac_older_than_26_builds_with_the_fallback_alone(self):
+        # Why: Xcode's icon compiler crashes on a layered icon on macOS 15, where Strata is built too.
+        # Given a macOS 15 build host, when the icon is built without ever starting the compiler.
+        with patch.object(build_icon, "host_version", return_value=(15, 7)), \
+             patch.object(build_icon.subprocess, "run", side_effect=AssertionError("the icon compiler was started")), \
+             contextlib.redirect_stdout(io.StringIO()) as said:
+            build_icon.build(self.resources, self.info)
+        # Then the bundle holds the fallback, its metadata is unchanged, and the build says what it left out.
+        self.assertEqual([item.name for item in self.resources.iterdir()], ["AppIcon.icns"])
+        self.assertEqual((self.resources / "AppIcon.icns").read_bytes(),
+                         (ROOT / "Resources" / "AppIcon.icns").read_bytes())
+        self.assertEqual(self.info.read_bytes(), self.original_info)
+        self.assertIn("without its layers", said.getvalue())
+
+    def test_layers_are_compiled_from_macos_26(self):
+        self.assertFalse(build_icon.compiles_layers((15, 7)))
+        self.assertTrue(build_icon.compiles_layers((26, 0)))
+        self.assertTrue(build_icon.compiles_layers((27, 2)))
+        # Not a Mac (no version to read): the compiler is asked, and its failure stops the build.
+        self.assertTrue(build_icon.compiles_layers(()))
+
     def test_compiler_failure_stops_before_changing_bundle_resources_or_metadata(self):
         (self.resources / "Assets.car").write_bytes(b"previous catalog")
         (self.resources / "AppIcon.icns").write_bytes(b"previous fallback")
-        with patch.object(build_icon.subprocess, "run", side_effect=subprocess.CalledProcessError(1, ["actool"])):
+        with patch.object(build_icon, "host_version", return_value=(26, 0)), \
+             patch.object(build_icon.subprocess, "run", side_effect=subprocess.CalledProcessError(1, ["actool"])):
             with self.assertRaises(subprocess.CalledProcessError):
                 build_icon.build(self.resources, self.info)
         self.assertEqual(self.info.read_bytes(), self.original_info)

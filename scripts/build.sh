@@ -81,7 +81,10 @@ identity="${STRATA_SIGNING_IDENTITY:-}"
 if [[ -z "$identity" ]]; then
   identity=$(security find-identity -v -p codesigning | sed -n 's/.*"\(Developer ID Application: [^"]*\)".*/\1/p' | head -1)
 fi
-sign=(--force --options runtime --sign "${identity:--}")
+sign=(--force --sign "${identity:--}")
+# The hardened runtime loads only libraries signed by Apple or by the app's own team. An ad-hoc build has no team: with
+# the runtime on, macOS refuses its Sparkle and the app never starts.
+if [[ -n "$identity" ]]; then sign+=(--options runtime); fi
 if [[ -n "${STRATA_KEYCHAIN:-}" ]]; then sign+=(--keychain "$STRATA_KEYCHAIN"); fi
 if [[ "${STRATA_TIMESTAMP:-}" == 1 && -n "$identity" ]]; then sign+=(--timestamp); fi
 # Inside out: Sparkle's helpers, then the framework, the command-line helper, the archive service, and the bundle that

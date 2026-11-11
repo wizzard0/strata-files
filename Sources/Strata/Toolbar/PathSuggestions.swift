@@ -177,8 +177,8 @@ final class PathSuggestionList: NSObject {
     }
 
     private func build() {
-        let glass = NSGlassEffectView()
-        glass.cornerRadius = 14
+        let glass = Glass.panel()
+        glass.panelCornerRadius = 14
         let content = NSView()
 
         ChoiceList.configure(table, rowHeight: Self.rowHeight, owner: self, action: #selector(rowClicked))
@@ -206,7 +206,7 @@ final class PathSuggestionList: NSObject {
             footer.trailingAnchor.constraint(lessThanOrEqualTo: content.trailingAnchor, constant: -16),
             footer.centerYAnchor.constraint(equalTo: content.bottomAnchor, constant: -Self.footerHeight / 2),
         ])
-        glass.contentView = content
+        glass.panelContent = content
         panel.contentView = glass
     }
 

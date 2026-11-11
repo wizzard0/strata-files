@@ -209,6 +209,8 @@ struct RemoteFilesTests {
         #expect(sandbox.snapshot() == original)
     }
 
+    // The check starts a task with `Task.immediate`, which arrived with macOS 26.
+    @available(macOS 26, *)
     @Test func disconnectWaitsForAnActiveDownloadToStopBeforeRemovingItsCopy() async throws {
         defer { cleanUp() }
         let original = sandbox.snapshot()
@@ -270,6 +272,8 @@ struct RemoteFilesTests {
         #expect(sandbox.snapshot() == original)
     }
 
+    // The check starts a task with `Task.immediate`, which arrived with macOS 26.
+    @available(macOS 26, *)
     @Test func disconnectAlsoDrainsAutomaticallyPrefetchedFiles() async throws {
         defer { cleanUp() }
         let original = sandbox.snapshot()
@@ -292,6 +296,7 @@ struct RemoteFilesTests {
         #expect(sandbox.snapshot() == original)
     }
 
+    @available(macOS 26, *)
     private static func beginDiscard(_ files: isolated RemoteFiles, id: String) -> Task<Void, Never> {
         // Begin on this actor through the first suspension, so the held download guarantees overlapping discards.
         Task.immediate {

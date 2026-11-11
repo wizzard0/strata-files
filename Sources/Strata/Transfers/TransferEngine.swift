@@ -487,6 +487,9 @@ package nonisolated enum TransferEngine {
                     let relative = String(failure.source.path.dropFirst(parent.path.count)).trimmingCharacters(in: CharacterSet(charactersIn: "/"))
                     if (target as NSString).appendingPathComponent(relative) == destination.path { return false }
                 }
+                // Stop at the root by name: its parent is itself only from macOS 26. On macOS 15 it is "/..", then
+                // "/../..", without end.
+                if parent.path == "/" { break }
                 let next = parent.deletingLastPathComponent()
                 if next.path == parent.path { break }
                 parent = next

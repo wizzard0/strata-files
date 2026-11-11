@@ -1,4 +1,5 @@
 import AppKit
+import os
 import UniformTypeIdentifiers
 
 extension NSPasteboard.PasteboardType {
@@ -59,7 +60,8 @@ package nonisolated final class ContainerPromises: NSObject, NSFilePromiseProvid
         let source = item.source
         let copies = item.copies
         let done = DispatchSemaphore(value: 0)
-        nonisolated(unsafe) var failure: Error?
+        // Behind a lock: Swift 6.2 takes a variable shared with the task for a data race, even past the semaphore.
+        let failure = OSAllocatedUnfairLock<(any Error)?>(initialState: nil)
         Task {
             do {
                 try await copies.prepareForCopying([source])
@@ -70,11 +72,11 @@ package nonisolated final class ContainerPromises: NSObject, NSFilePromiseProvid
                 }
                 try result.get()
             } catch {
-                failure = error
+                failure.withLock { $0 = error }
             }
             done.signal()
         }
         done.wait()
-        completionHandler(failure)
+        completionHandler(failure.withLock { $0 })
     }
 }

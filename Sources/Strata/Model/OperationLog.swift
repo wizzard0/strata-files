@@ -219,7 +219,9 @@ package final class OperationLog {
     /// What goes back: each moved or replaced item still the one the operation left, to a place that's free (nothing
     /// there, the item itself, or a place another of its moves vacates first). Read away from the main thread.
     @concurrent private static func movesBack(_ entry: Entry) async -> [FileOps.Move] {
-        (entry.moves.reversed() + entry.replacements.reversed()).filter { holdsOriginal(entry, $0.to) }.map {
+        // Named first: Swift 6.2 can't type-check the two reversed lists joined inside the chain below.
+        let moves = Array(entry.moves.reversed()), replacements = Array(entry.replacements.reversed())
+        return (moves + replacements).filter { holdsOriginal(entry, $0.to) }.map {
             (from: URL(fileURLWithPath: $0.to), to: URL(fileURLWithPath: $0.from))
         }.filter { move in
             identity(move.to.path) == nil || identity(move.to.path) == identity(move.from.path)

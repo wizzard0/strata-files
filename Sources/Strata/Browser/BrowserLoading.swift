@@ -48,7 +48,7 @@ nonisolated struct VolumeSpace: Sendable, Equatable {
     private(set) var volumeSpace: VolumeSpace?
     private(set) var hasPartialListing = false
 
-    init(reader: DirectoryReader, capacity: @escaping @Sendable (URL) async -> VolumeSpace? = BrowserLoading.readVolumeSpace,
+    init(reader: DirectoryReader, capacity: @escaping @Sendable (URL) async -> VolumeSpace? = { await BrowserLoading.readVolumeSpace($0) },
          now: @escaping @Sendable () -> Date = Date.init) {
         self.reader = reader
         self.capacity = capacity

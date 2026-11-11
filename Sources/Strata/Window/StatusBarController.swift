@@ -1,7 +1,7 @@
 import AppKit
 
 /// Item count, selection size and free space, attached under the file list.
-final class StatusBarController: NSSplitViewItemAccessoryViewController {
+final class StatusBarController: SplitAccessoryBar {
     var details: String? {
         get { status.label.toolTip }
         set { status.label.toolTip = newValue }
@@ -10,11 +10,8 @@ final class StatusBarController: NSSplitViewItemAccessoryViewController {
 
     init(clipboard: Clipboard) {
         status = BrowserStatusView(clipboard: clipboard)
-        super.init(nibName: nil, bundle: nil)
+        super.init()
     }
-
-    @available(*, unavailable)
-    required init?(coder: NSCoder) { return nil }
 
     override func loadView() {
         let container = ThemeAccessoryView()

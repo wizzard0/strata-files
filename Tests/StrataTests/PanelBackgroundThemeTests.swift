@@ -10,6 +10,8 @@ import Testing
 @testable import StrataSearch
 
 extension ColorThemeTests {
+    // Liquid Glass and its split view accessories arrived with macOS 26.
+    @available(macOS 26, *)
     @Test func oneCanvasExtendsUnderTheNativePanelsWithoutMovingFilesOrAccessories() throws {
         let _ = NSApplication.shared
         let saved = ThemeStyle.options, contrast = ThemeStyle.highContrast

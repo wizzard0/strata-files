@@ -88,7 +88,7 @@ struct SecurityFollowupTests {
         let file = tree.url("file")
         try FileInfoEditing.setComment("Original", at: file.path)
         try FileInfoEditing.setComment("Sibling", at: tree.url("sibling").path)
-        let editor = InfoEditor(readFacts: InfoEditor.Facts.read(_:opensWithApps:))
+        let editor = InfoEditor(readFacts: { await InfoEditor.Facts.read($0, opensWithApps: $1) })
         editor.show(try #require(FileEntry(url: file)))
         await editor.factsTask?.value
         let field = try #require(editor.commentsContent.arrangedSubviews.first as? NSTextField)
@@ -112,7 +112,7 @@ struct SecurityFollowupTests {
         let tree = try TestTree("file", "other")
         try FileInfoEditing.setComment("Before", at: tree.url("file").path)
         try FileInfoEditing.setComment("Other", at: tree.url("other").path)
-        let editor = InfoEditor(readFacts: InfoEditor.Facts.read(_:opensWithApps:))
+        let editor = InfoEditor(readFacts: { await InfoEditor.Facts.read($0, opensWithApps: $1) })
         editor.show(try #require(FileEntry(url: tree.url("file"))))
         await editor.factsTask?.value
         let field = try #require(editor.commentsContent.arrangedSubviews.first as? NSTextField)
@@ -141,7 +141,7 @@ struct SecurityFollowupTests {
         let tree = try TestTree("file", "other")
         let file = tree.url("file")
         try FileInfoEditing.setComment("Original", at: file.path)
-        let editor = InfoEditor(readFacts: InfoEditor.Facts.read(_:opensWithApps:))
+        let editor = InfoEditor(readFacts: { await InfoEditor.Facts.read($0, opensWithApps: $1) })
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 300, height: 150),
                               styleMask: [.borderless], backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false

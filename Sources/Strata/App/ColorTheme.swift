@@ -1,4 +1,5 @@
 import AppKit
+import StrataSupport
 import Synchronization
 
 /// A hue shared by the entire browser; file types, tags and status colors keep their meanings.
@@ -352,7 +353,7 @@ package enum ThemeStyle {
     }
 
     package static func tintHeaderMaterial(_ view: NSView, withinWindow: Bool = false) {
-        guard view is NSGlassEffectView || (withinWindow && view is NSVisualEffectView)
+        guard view.isGlass || (withinWindow && view is NSVisualEffectView)
                 || headerMaterials.object(forKey: view) != nil else { return }
         if headerMaterials.object(forKey: view) == nil { headerMaterials.setObject(HeaderMaterialTint(view), forKey: view) }
         headerMaterials.object(forKey: view)?.apply(to: view, withinWindow: withinWindow)

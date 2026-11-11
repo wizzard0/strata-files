@@ -9,6 +9,7 @@ import FoundationModels
 // comes back as `GeneratedContent`, read here by key.
 
 /// Small builders for `DynamicGenerationSchema`.
+@available(macOS 26, *)
 package nonisolated enum Schema {
     package struct Field {
         package let name: String
@@ -47,6 +48,7 @@ package nonisolated enum Schema {
 }
 
 /// Reading `GeneratedContent` by key. Works on partial content while streaming (missing keys read as nil).
+@available(macOS 26, *)
 nonisolated extension GeneratedContent {
     package subscript(key: String) -> GeneratedContent? {
         if case let .structure(properties, _) = kind { return properties[key] }

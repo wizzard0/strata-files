@@ -1,6 +1,6 @@
 # Strata: notes for coding agents
 
-Strata is a native macOS file manager (Swift, AppKit, SwiftPM; macOS 26, Apple silicon). People trust it with their
+Strata is a native macOS file manager (Swift, AppKit, SwiftPM; macOS 15 or later, made for macOS 26; Apple silicon). People trust it with their
 files: a bug that deletes, trashes, moves or overwrites the wrong thing is the worst bug it can have. Read
 [Changes that touch files](#changes-that-touch-files) before changing anything that does.
 
@@ -54,6 +54,14 @@ python3 -m unittest discover -s Tests -p 'test_*.py'  # checkers and generated r
 - `swift test` needs Xcode's toolchain: the Command Line Tools fail with "no such module 'Testing'".
 - Run the debug and sanitizer suites one after the other, never together: both use the real Trash, and a second
   runner can reuse a pending Redo's old Trash path and correctly trigger a refusal.
+- Strata builds and runs on macOS 15 as well, with Xcode 26.3 (Swift 6.2), the newest that runs there. What macOS 26
+  added is asked for at run time (`#available(macOS 26, *)`), never assumed: Liquid Glass goes through `Glass`
+  (`Support/Glass.swift`; macOS 15 gets the popover material), split view accessories through `SplitAccessoryBar`
+  (stacked with the content on macOS 15), and the on-device model through `AIModel.status` (a Mac that can't run it
+  on macOS 15). Tests of what only macOS 26 has carry `@available(macOS 26, *)` and are skipped on macOS 15. That
+  compiler crashes on a reference to a `@concurrent` function passed as a value (`read: Reader.read`): pass a closure
+  that calls it. Its SDK lacks what Xcode 26.4 added: put those calls behind `#if compiler(>=6.3)`. The layered icon
+  compiles on macOS 26 only; a macOS 15 build carries the ICNS alone.
 - `scripts/build.sh debug --open` quits every running Strata, the user's installed copy included, before launching
   the build. To try a build next to the user's copy, run `open -n build/Strata.app` instead.
 

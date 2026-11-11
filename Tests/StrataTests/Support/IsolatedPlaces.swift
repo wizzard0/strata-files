@@ -12,7 +12,7 @@ extension PlaceChecks {
     static func isolated() throws -> PlaceChecks {
         let preferences = try Prefs.isolated()
         return PlaceChecks(preferences: preferences, visits: Frecency(preferences: preferences.defaults),
-                           read: PlaceChecks.read)
+                           read: { await PlaceChecks.read($0) })
     }
 }
 
@@ -20,7 +20,7 @@ extension PathSuggestions {
     /// Suggestions for `preferences`, with visits, checks and an (unstarted) index of their own.
     convenience init(_ preferences: Prefs) {
         let visits = Frecency(preferences: preferences.defaults)
-        self.init(preferences: preferences, places: PlaceChecks(preferences: preferences, visits: visits, read: PlaceChecks.read),
+        self.init(preferences: preferences, places: PlaceChecks(preferences: preferences, visits: visits, read: { await PlaceChecks.read($0) }),
                   index: FileIndex(storage: .shared, copies: .live))
     }
 }

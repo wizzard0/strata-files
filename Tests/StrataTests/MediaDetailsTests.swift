@@ -207,6 +207,8 @@ import os
         withExtendedLifetime(environment) {}
     }
 
+    // The check starts its waiting ticket with `Task.immediate`, which arrived with macOS 26.
+    @available(macOS 26, *)
     @Test func allowanceCancelsOnlyWaitingTicketsAndRefusesAnotherTicketsRelease() async throws {
         try await Self.checkAllowanceOwnership(WorkAllowance(limit: 1))
     }
@@ -263,6 +265,7 @@ import os
         #expect(MediaNavigation(subtitles: [String(repeating: "x", count: MediaNavigation.titleByteLimit + 1)]).subtitles == nil)
     }
 
+    @available(macOS 26, *)
     private static func checkAllowanceOwnership(_ allowance: isolated WorkAllowance) async throws {
         let first = UUID(), second = UUID()
         try await allowance.enter(first)

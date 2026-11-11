@@ -2,7 +2,7 @@ import AppKit
 
 /// A one-line note under the toolbar about the folder shown, with an optional button: other disks' Trashes while you
 /// look at the Trash, or that you're inside an archive's read-only copy.
-final class NoticeBar: NSSplitViewItemAccessoryViewController {
+final class NoticeBar: SplitAccessoryBar {
     private let icon = NSImageView()
     private let label = NSTextField(labelWithString: "")
     private let button = NSButton()

@@ -22,14 +22,14 @@ extension ColorThemeTests {
             PaletteItem(title: "Beta", subtitle: "Second", icon: icon, kind: .action, run: { actions.append("Beta") }),
         ])
         let root = try #require(palette.panel.contentView as? ShadowedGlass)
-        let content = try #require(root.glass.contentView)
+        let content = try #require(root.glass.panelContent)
         let canvas = try #require(content.subviews.compactMap { $0 as? ThemeSurfaceView }.first)
         let field = try #require(commandThemeDescendants(content).compactMap { $0 as? NSTextField }.first { $0.isEditable })
         let table = try #require(commandThemeDescendants(content).compactMap { $0 as? NSTableView }.first)
         table.selectRowIndexes([1], byExtendingSelection: false)
         field.stringValue = "unfinished query"
         let originalChildren = root.subviews
-        let radius = root.glass.cornerRadius
+        let radius = root.glass.panelCornerRadius
         for name in [NSAppearance.Name.aqua, .darkAqua] {
             palette.panel.appearance = NSAppearance(named: name)
             for color in ColorTheme.allCases {
@@ -37,7 +37,7 @@ extension ColorThemeTests {
                 #expect(canvas.isHidden == (color == .system))
                 #expect(table.selectedRow == 1 && table.numberOfRows == 2 && field.stringValue == "unfinished query")
                 #expect(actions.isEmpty && !palette.isVisible)
-                #expect(root.subviews == originalChildren && root.glass.cornerRadius == radius)
+                #expect(root.subviews == originalChildren && root.glass.panelCornerRadius == radius)
                 #expect(palette.panel.backgroundColor == .clear && !palette.panel.isOpaque)
                 #expect(!field.drawsBackground && table.refusesFirstResponder)
                 let row = try #require(palette.tableView(table, rowViewForRow: 0))

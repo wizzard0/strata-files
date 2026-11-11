@@ -67,7 +67,7 @@ package nonisolated enum Summarizer {
         AsyncThrowingStream(bufferingPolicy: .bufferingNewest(1)) { continuation in
             let task = Task {
                 let fallback = keySentences(text: text, titleHint: titleHint)
-                guard preferModel, AIModel.isAvailable else {
+                guard preferModel, AIModel.isAvailable, #available(macOS 26, *) else {
                     continuation.yield(fallback)
                     continuation.finish()
                     return
@@ -93,6 +93,7 @@ package nonisolated enum Summarizer {
 
     // MARK: - Model
 
+    @available(macOS 26, *)
     package static func schema() throws -> GenerationSchema {
         try Schema.root(Schema.object("Summary", nil, [
             Schema.field("title", "A specific title for the document, at most 8 words", Schema.string()),
@@ -112,6 +113,7 @@ package nonisolated enum Summarizer {
         return tokens * 3  // ~3 characters per token is conservative for English prose.
     }
 
+    @available(macOS 26, *)
     package static func modelSummary(text: String, titleHint: String?, yield: @Sendable (DocumentSummary) -> Void) async throws {
         var body = text
         var note: String?
@@ -156,6 +158,8 @@ package nonisolated enum Summarizer {
     /// Trims text to the context budget; on macOS 26.4+ checks the real token count.
     package static func fitted(_ text: String) async throws -> String {
         var body = String(text.prefix(characterBudget))
+        // The token count needs Xcode 26.4's SDK, which comes with Swift 6.3.
+        #if compiler(>=6.3)
         if #available(macOS 26.4, *) {
             let budget = max(1000, AIModel.contextSize - 900)
             for _ in 0..<3 {
@@ -167,6 +171,7 @@ package nonisolated enum Summarizer {
                 body = String(body.prefix(keep))
             }
         }
+        #endif
         return body
     }
 

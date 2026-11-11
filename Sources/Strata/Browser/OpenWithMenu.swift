@@ -36,7 +36,7 @@ nonisolated struct FinderLook: Sendable {
     private var reading: [String: Read] = [:]
     private var wanted: Set<String>?
 
-    init(read: @escaping @Sendable (URL) async -> FinderLook = FinderLook.read) {
+    init(read: @escaping @Sendable (URL) async -> FinderLook = { await FinderLook.read($0) }) {
         self.read = read
     }
 

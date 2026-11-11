@@ -243,16 +243,19 @@ nonisolated package struct MediaDetails: Equatable, Sendable {
         guard !Task.isCancelled, let items = try? await asset.load(.commonMetadata), !items.isEmpty else {
             return (nil, nil, nil, nil)
         }
-        func firstString(_ id: AVMetadataIdentifier) async -> String? {
+        // Read in a loop, not a local function: Swift 6.2 takes handing `items` to one for a data race.
+        var strings: [AVMetadataIdentifier: String] = [:]
+        for id in [AVMetadataIdentifier.commonIdentifierTitle, .commonIdentifierArtist, .commonIdentifierAlbumName,
+                   .commonIdentifierCreationDate] {
             guard !Task.isCancelled,
                   let item = AVMetadataItem.metadataItems(from: items, filteredByIdentifier: id).first,
-                  let value = try? await item.load(.stringValue) else { return nil }
-            return cleaned(value)
+                  let value = try? await item.load(.stringValue) else { continue }
+            strings[id] = cleaned(value)
         }
-        let title = await firstString(.commonIdentifierTitle)
-        let artist = await firstString(.commonIdentifierArtist)
-        let album = await firstString(.commonIdentifierAlbumName)
-        let rawDate = await firstString(.commonIdentifierCreationDate)
+        let title = strings[.commonIdentifierTitle]
+        let artist = strings[.commonIdentifierArtist]
+        let album = strings[.commonIdentifierAlbumName]
+        let rawDate = strings[.commonIdentifierCreationDate]
         let year: String? = rawDate.flatMap { str in
             let prefix = String(str.prefix(4))
             if prefix.count == 4, let y = Int(prefix), (1900...2100).contains(y) { return prefix }

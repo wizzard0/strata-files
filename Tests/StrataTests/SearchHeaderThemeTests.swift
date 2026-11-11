@@ -24,7 +24,7 @@ extension ColorThemeTests {
         let matchCase = try #require(controls.compactMap { $0 as? NSButton }.first { $0.title == String(localized: "Match Case") })
         let summary = try #require(controls.compactMap { $0 as? NSTextField }.first { $0.stringValue == "12 matches" })
         let button = try #require(searchThemeDescendants(notice.view).compactMap { $0 as? NSButton }.first)
-        for controller in [search as NSViewController, notice] {
+        for controller in [search as SplitAccessoryBar, notice] {
             controller.view.frame = NSRect(x: 0, y: 0, width: 700, height: 34)
             controller.view.layoutSubtreeIfNeeded()
         }
@@ -32,7 +32,7 @@ extension ColorThemeTests {
             let appearance = try #require(NSAppearance(named: name))
             for palette in ColorTheme.allCases {
                 ThemeStyle.apply(ColorThemeOptions(palette: palette), windows: [], highContrast: false)
-                for controller in [search as NSViewController, notice] {
+                for controller in [search as SplitAccessoryBar, notice] {
                     controller.view.appearance = appearance
                     ThemeStyle.refresh(controller.view)
                     let fill = try #require(controller.view.subviews.compactMap { $0 as? ThemeSurfaceView }.first)

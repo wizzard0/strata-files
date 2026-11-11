@@ -28,7 +28,7 @@ package nonisolated enum QueryInterpreter {
     package static func interpret(_ text: String, now: Date = .now, calendar: Calendar = .current, allowModel: Bool = true,
                           timeout: Double = 6) async -> QueryInterpretation {
         let rules = parse(text, now: now, calendar: calendar)
-        guard allowModel, !rules.unrecognized.isEmpty, AIModel.isAvailable else { return rules }
+        guard allowModel, !rules.unrecognized.isEmpty, AIModel.isAvailable, #available(macOS 26, *) else { return rules }
         do {
             let modelFilter = try await Deadline.run(timeout) { try await askModel(text, now: now, calendar: calendar) }
             return merge(rules, modelFilter)
@@ -77,6 +77,7 @@ package nonisolated enum QueryInterpreter {
     package static let dateRanges = ["any", "today", "yesterday", "thisWeek", "lastWeek", "thisMonth", "lastMonth", "thisYear", "lastYear",
                              "lastDays", "olderThanDays", "year", "since", "before", "between"]
 
+    @available(macOS 26, *)
     package static func schema() throws -> GenerationSchema {
         let kind = Schema.choice("Kind", SearchFilter.Kind.allCases.map(\.rawValue))
         return try Schema.root(Schema.object("FileSearch", "A filter for finding files on a Mac", [
@@ -107,6 +108,7 @@ package nonisolated enum QueryInterpreter {
         """
     }
 
+    @available(macOS 26, *)
     package static func askModel(_ text: String, now: Date, calendar: Calendar) async throws -> SearchFilter {
         let session = LanguageModelSession(model: SystemLanguageModel(useCase: .general), instructions: instructions(now: now, calendar: calendar))
         let response = try await session.respond(to: "Request: \(text)", schema: try schema(),
@@ -115,6 +117,7 @@ package nonisolated enum QueryInterpreter {
     }
 
     /// Model output → filter. Relative dates are computed here, not by the model (small models get date arithmetic wrong).
+    @available(macOS 26, *)
     package static func decode(_ content: GeneratedContent, now: Date, calendar: Calendar) -> SearchFilter {
         var filter = SearchFilter()
         filter.kinds = Set(content["kinds"]?.strings.compactMap(SearchFilter.Kind.init(rawValue:)) ?? [])

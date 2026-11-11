@@ -1,7 +1,7 @@
 import AppKit
 
 /// Shown under the toolbar while searching: where to search, how many matches, and saving the search.
-final class SearchScopeBar: NSSplitViewItemAccessoryViewController {
+final class SearchScopeBar: SplitAccessoryBar {
     var onScopeChange: ((_ everywhere: Bool) -> Void)?
     var onSave: (() -> Void)?
     /// Match Case was switched (the search's `case:`).

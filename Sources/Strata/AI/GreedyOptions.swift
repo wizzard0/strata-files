@@ -1,5 +1,6 @@
 import FoundationModels
 
+@available(macOS 26, *)
 extension GenerationOptions {
     /// Always the likeliest answer. SDK 27 renamed the option (the old name is deprecated there), and CI builds with
     /// Xcode 26, which knows only the old one.

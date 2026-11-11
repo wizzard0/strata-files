@@ -1,5 +1,18 @@
 import AppKit
 
+private extension NSSplitViewItem {
+    /// macOS 26 runs an item's content beneath the panels floating beside it. Nothing floats on macOS 15: nil there.
+    var adjustsSafeArea: Bool? {
+        get {
+            if #available(macOS 26, *) { return automaticallyAdjustsSafeAreaInsets }
+            return nil
+        }
+        set {
+            if #available(macOS 26, *), let newValue { automaticallyAdjustsSafeAreaInsets = newValue }
+        }
+    }
+}
+
 /// Restore AppKit’s original named color and material settings, not a custom color resolving to the same RGB values.
 package final class ThemeWindowBinding: NSObject {
     private let background: NSColor
@@ -11,7 +24,7 @@ package final class ThemeWindowBinding: NSObject {
         background = window.backgroundColor
         transparent = window.titlebarAppearsTransparent
         let items = (window.contentViewController as? any ThemeSplitWindowContent)?.splitViewItems
-        adjustsSafeArea = items.flatMap { $0.indices.contains(1) ? $0[1].automaticallyAdjustsSafeAreaInsets : nil }
+        adjustsSafeArea = items.flatMap { $0.indices.contains(1) ? $0[1].adjustsSafeArea : nil }
         super.init()
     }
 
@@ -22,9 +35,9 @@ package final class ThemeWindowBinding: NSObject {
            split.splitViewItems.indices.contains(1), let adjustsSafeArea {
             let item = split.splitViewItems[1]
             let extend = ThemeStyle.colorsSurfaces || adjustsSafeArea
-            if item.automaticallyAdjustsSafeAreaInsets != extend {
+            if item.adjustsSafeArea != extend {
                 // One canvas beneath the floating panels avoids a second, focus-dependent backdrop at their edges.
-                item.automaticallyAdjustsSafeAreaInsets = extend
+                item.adjustsSafeArea = extend
                 window.contentView?.layoutSubtreeIfNeeded()
             }
         }

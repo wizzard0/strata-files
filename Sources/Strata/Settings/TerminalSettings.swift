@@ -57,7 +57,7 @@ struct TerminalSettings: View {
         }
         .task(id: pendingChoice) {
             guard let url = pendingChoice else { return }
-            let choice = await TerminalApplication.choose(url, register: TerminalApplication.register)
+            let choice = await TerminalApplication.choose(url) { await TerminalApplication.register($0) }
             guard !Task.isCancelled, pendingChoice == url else { return }
             guard let choice else { invalidChoice = true; return }
             selectedName = choice.name

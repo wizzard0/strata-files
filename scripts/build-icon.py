@@ -3,6 +3,7 @@
 
 Usage: python3 scripts/build-icon.py RESOURCES INFO_PLIST
 """
+import platform
 import plistlib
 from pathlib import Path
 import shutil
@@ -14,6 +15,16 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def host_version():
+    """The Mac this build runs on, as (major, minor); empty where there is none to read."""
+    return tuple(int(part) for part in platform.mac_ver()[0].split(".")[:2] if part.isdigit())
+
+
+def compiles_layers(host):
+    """Xcode's icon compiler crashes on a layered icon before macOS 26. Anywhere else it is asked, and may fail."""
+    return not host or host >= (26, 0)
+
+
 def build(resources, info_plist):
     resources, info_plist = Path(resources), Path(info_plist)
     with info_plist.open("rb") as file:
@@ -23,6 +34,11 @@ def build(resources, info_plist):
     fallback = ROOT / "Resources" / f"{name}.icns"
     if not (source / "icon.json").is_file() or not fallback.is_file():
         raise FileNotFoundError("The layered app icon and its ICNS fallback are both required.")
+    if not compiles_layers(host_version()):
+        resources.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(fallback, resources / f"{name}.icns")
+        print(f"Installed {name}.icns without its layers: this Mac's macOS is too old to compile {name}.icon.")
+        return
 
     with tempfile.TemporaryDirectory(prefix="strata-icon-") as scratch:
         compiled = Path(scratch)

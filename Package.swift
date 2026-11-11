@@ -113,7 +113,7 @@ let indexSources = [
 
 let package = Package(
     name: "Strata",
-    platforms: [.macOS(.v26)],
+    platforms: [.macOS(.v15)],
     dependencies: [
         // Updates (Check for Updates…, automatic checks), pinned to a release and verified by its checksum.
         .package(url: "https://github.com/sparkle-project/Sparkle", exact: "2.10.0"),

@@ -57,7 +57,7 @@ extension Notification.Name {
     /// folders in `visited` used most.
     package func lookupRoots(visited: [URL], servers: Bool) -> [URL] {
         Places.favorites(preferences: preferences, checks: self).map(\.url)
-            + snapshot.volumes.filter { servers || $0.symbol != "network" }.map(\.url) + [Places.home] + visited.prefix(100)
+            + snapshot.volumes.filter { servers || $0.symbol != "network" }.map(\.url) + [Places.home] + Array(visited.prefix(100))
     }
 
     /// Reads them all again, once the read under way (if any) is done.

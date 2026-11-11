@@ -230,7 +230,7 @@ package nonisolated enum PlanGenerator {
         guard !request.items.isEmpty else { throw PlanError.nothingSelected }
         let rules = PlanRules.recipe(for: request.instruction, now: request.now)
         let useModel = allowModel && AIModel.isAvailable && (rules == nil || rules?.fullyUnderstood == false)
-        if useModel {
+        if useModel, #available(macOS 26, *) {
             do {
                 let answer = try await ModelPlanner.plan(request)
                 switch answer {
@@ -428,6 +428,7 @@ package nonisolated enum ModelPlanner {
 
     package static let maxListedItems = 40
 
+    @available(macOS 26, *)
     package static func schema() throws -> GenerationSchema {
         let kinds = Schema.choice("ItemKind", SearchFilter.Kind.allCases.map(\.rawValue))
         let match = Schema.object("Match", "Which of the listed items the plan applies to; leave empty for all", [
@@ -475,6 +476,7 @@ package nonisolated enum ModelPlanner {
         return lines.joined(separator: "\n")
     }
 
+    @available(macOS 26, *)
     package static func plan(_ request: PlanGenerator.Request) async throws -> Answer {
         let today = request.now.formatted(Date.ISO8601FormatStyle(timeZone: .current).year().month().day())
         let instructions = """
@@ -493,6 +495,7 @@ package nonisolated enum ModelPlanner {
     }
 
     /// Model output → recipe or explicit operations. Item numbers outside the list are dropped (and so can't touch anything).
+    @available(macOS 26, *)
     package static func decode(_ content: GeneratedContent, items: [PlanItem], now: Date) -> Answer {
         let dateSource = content["dateSource"]?.string.flatMap(PlanRecipe.DateSource.init(rawValue:)) ?? .best
         var filter = SearchFilter()

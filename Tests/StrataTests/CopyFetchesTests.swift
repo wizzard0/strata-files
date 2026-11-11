@@ -152,6 +152,8 @@ struct CopyFetchesTests {
         }
     }
 
+    // The check starts a task with `Task.immediate`, which arrived with macOS 26.
+    @available(macOS 26, *)
     @Test func containerTeardownDrainsBothFileAndTreeDownloads() async throws {
         for kind in [CopyFetches.Kind.file, .tree] {
             let fixture = try ContainerFixture()
@@ -191,6 +193,7 @@ struct CopyFetchesTests {
         }
     }
 
+    @available(macOS 26, *)
     private static func beginDiscard(_ files: isolated ContainerFiles, top: URL) -> Task<Void, Never> {
         Task.immediate {
             _ = files.closing

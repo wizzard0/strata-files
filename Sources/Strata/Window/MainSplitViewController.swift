@@ -21,10 +21,12 @@ final class MainSplitViewController: NSSplitViewController, ThemeSplitWindowCont
 
         // The minimums (180 + 320 + 240) fit inside the window's minimum width (760), so the panes never make the
         // window resize itself: a collapsed inspector peeking out in a narrow window did, and crashed AppKit mid-peek.
-        let sidebarItem = NSSplitViewItem(sidebarWithViewController: sidebar)
+        let footer = SidebarFooterController()
+        let sidebarItem = NSSplitViewItem(
+            sidebarWithViewController: SplitAccessories.content(sidebar, top: [], bottom: [footer]))
         sidebarItem.minimumThickness = 180
         sidebarItem.maximumThickness = 320
-        sidebarItem.addBottomAlignedAccessoryViewController(SidebarFooterController())
+        SplitAccessories.attach(top: [], bottom: [footer], to: sidebarItem)
 
         // Keep the split view itself out of the shared footer. Closing a pane can leave its old divider in the
         // backing layer, which otherwise shows through the footer in Columns and Disk Usage.
@@ -41,13 +43,12 @@ final class MainSplitViewController: NSSplitViewController, ThemeSplitWindowCont
             panes.view.topAnchor.constraint(equalTo: content.view.topAnchor),
             panes.view.bottomAnchor.constraint(equalTo: content.view.safeAreaLayoutGuide.bottomAnchor),
         ])
-        let contentItem = NSSplitViewItem(viewController: content)
-        contentItem.minimumThickness = 320
-        contentItem.addBottomAlignedAccessoryViewController(status)
         scopeBar.isHidden = true
-        contentItem.addTopAlignedAccessoryViewController(scopeBar)
         noticeBar.isHidden = true
-        contentItem.addTopAlignedAccessoryViewController(noticeBar)
+        let contentItem = NSSplitViewItem(
+            viewController: SplitAccessories.content(content, top: [scopeBar, noticeBar], bottom: [status]))
+        contentItem.minimumThickness = 320
+        SplitAccessories.attach(top: [scopeBar, noticeBar], bottom: [status], to: contentItem)
 
         inspectorItem.minimumThickness = 240
         inspectorItem.maximumThickness = 440
